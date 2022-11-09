@@ -100,6 +100,7 @@ const config = {
     extensions: ['.js', '.tsx', '.ts'],
     alias: {
       '@containers': path.resolve(__dirname, './src/containers'),
+      '@style': path.resolve(__dirname, './src/style'),
     }
   }
 };
@@ -128,6 +129,5 @@ module.exports = () => {
       },
     };
   }
-  // console.log(config.mode);
   return config;
 };

@@ -1,12 +1,11 @@
 import React from "react";
 import { createRoot } from 'react-dom/client';
-import { RouterProvider } from "react-router-dom";
-import router from './router';
+import WhiteBoard from '@containers/WhiteBoard';
 const container = document.getElementById('root');
+import '@style/index.less';
 const root = createRoot(container);
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <WhiteBoard />
   </React.StrictMode>
 );
-console.log('main');

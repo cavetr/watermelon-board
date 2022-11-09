@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import styles from './index.less';
 function drawLine(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
   ctx.beginPath();
@@ -8,7 +8,7 @@ function drawLine(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: num
   ctx.closePath();
   ctx.stroke();
 }
-function WhiteBoard() {
+const WhiteBoard = memo(() => {
   const boardRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = boardRef.current;
@@ -84,5 +84,5 @@ function WhiteBoard() {
       <canvas className={styles.board} ref={boardRef}></canvas>
     </div>
   )
-}
+})
 export default WhiteBoard;
