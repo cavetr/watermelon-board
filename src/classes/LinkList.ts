@@ -10,8 +10,8 @@ class LinkNode<NodeValType> {
 }
 
 class LinkList<NodeValType, KeyType> {
-  head: LinkNode<NodeValType> | null = null;
-  tail: LinkNode<NodeValType> | null = null;
+  private head: LinkNode<NodeValType> | null = null;
+  private tail: LinkNode<NodeValType> | null = null;
   private idNodeMap: Map<KeyType, LinkNode<NodeValType>> = new Map();
   constructor() { }
   addNode(newVal: NodeValType, id: KeyType) {

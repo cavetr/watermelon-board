@@ -8,6 +8,7 @@ function drawLine(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: num
   ctx.closePath();
   ctx.stroke();
 }
+
 const WhiteBoard = memo(() => {
   const boardRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
