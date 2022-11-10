@@ -101,6 +101,7 @@ const config = {
     alias: {
       '@containers': path.resolve(__dirname, './src/containers'),
       '@style': path.resolve(__dirname, './src/style'),
+      '@utils': path.resolve(__dirname, './src/utils'),
     }
   }
 };
