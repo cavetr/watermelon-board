@@ -1,10 +1,10 @@
-import Shape from "../classes/Shape";
+import Pen from "@class/Shape/Pen";
 
 enum PrintingType {
   PEN = 'pen',
 }
-const printingTypeDrawFnMap: Record<PrintingType, typeof Shape.printing> = {
-  [PrintingType.PEN]: Shape.printing,
+const printingTypeDrawFnMap: Record<PrintingType, typeof Pen.printing> = {
+  [PrintingType.PEN]: Pen.printing,
 }
 // 笔刷数据，用于绘图
 const printing = {

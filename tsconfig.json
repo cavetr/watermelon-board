@@ -2,6 +2,10 @@
   "compilerOptions": {
     "paths": {
       "@containers/*": ["./src/containers/*"],
+      "@style/*": ["./src/style/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@class/*": ["./src/classes/*"],
+
     }, 
     "outDir": "./dist/",
     "sourceMap": true,

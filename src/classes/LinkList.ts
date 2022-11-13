@@ -14,7 +14,7 @@ class LinkList<NodeValType, KeyType> {
   private tail: LinkNode<NodeValType> | null = null;
   private idNodeMap: Map<KeyType, LinkNode<NodeValType>> = new Map();
   constructor() { }
-  addNode(newVal: NodeValType, id: KeyType) {
+  addNode(id: KeyType, newVal: NodeValType) {
     const newNode = new LinkNode(newVal, null, this.tail);
     if (this.tail === null || this.head === null) {
       this.head = newNode;
