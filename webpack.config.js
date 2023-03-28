@@ -101,8 +101,9 @@ const config = {
     alias: {
       '@containers': path.resolve(__dirname, './src/containers'),
       '@style': path.resolve(__dirname, './src/style'),
-      '@class': path.resolve(__dirname, './src/classes'),
+      '@class': path.resolve(__dirname, './src/class'),
       '@utils': path.resolve(__dirname, './src/utils'),
+      '@type': path.resolve(__dirname, './src/type'),
     }
   }
 };
@@ -122,8 +123,8 @@ module.exports = () => {
           {
             from: /^\/.*$/,
             to: function (context) {
-              console.log(context.parsedUrl);
-              console.log(context.parsedUrl.pathname.split(/(?=\/)/)[0] + '/index.html' + (context.parsedUrl.search ?? '') + (context.parsedUrl.hash ?? ''));
+              // console.log(context.parsedUrl);
+              // console.log(context.parsedUrl.pathname.split(/(?=\/)/)[0] + '/index.html' + (context.parsedUrl.search ?? '') + (context.parsedUrl.hash ?? ''));
               return context.parsedUrl.pathname.split(/(?=\/)/)[0] + '/index.html' + (context.parsedUrl.search ?? '') + (context.parsedUrl.hash ?? '');
             }
           }

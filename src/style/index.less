@@ -1,3 +1,20 @@
 body {
   margin: 0;
 }
+:global {
+  .board {
+    position: relative;
+    border: 1px solid rgb(213, 168, 100);
+    top: 100px;
+    left: 100px;
+    width: min-content;
+  }
+  .drawing-board {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .text-input {
+    position: absolute;
+  }
+}

@@ -42,9 +42,9 @@ class LinkList<NodeValType, KeyType> {
     }
     this.idNodeMap.delete(id);
   }
-  forEach(fn: (id: KeyType, node: LinkNode<NodeValType>) => void) { 
+  forEach(fn: (id: KeyType, node: NodeValType) => void) { 
     for(const [id, node] of this.idNodeMap) {
-      fn(id, node);
+      fn(id, node.val);
     }
   }
 }
