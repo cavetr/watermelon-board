@@ -17,14 +17,16 @@ class PrintingBoard {
       ws.emit(ST.ADD, {
         version: this.version,
         data: {
-          data,
+          data: {
+            printing: data,
+          },
           type: ST.ADD,
         }
       })
     });
   }
   private addShape(shape: IPrinting) {
-    this.shapeList.addNode(shape.id, shape);
+    this.shapeList.addNode(shape.shapeId, shape);
   }
   private deleteShape(id: Id) {
     this.shapeList.deleteNode(id);
@@ -35,6 +37,7 @@ class PrintingBoard {
       clearTimeout(this.reDrawTimeOutId);
       this.reDrawTimeOutId = void 0;
     }
+    console.log('redraw');
     this.shapeList.forEach((id, printing) => {
       // 图形绘制逻辑
       switch (printing.data.type) {

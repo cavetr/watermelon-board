@@ -6,7 +6,6 @@
       "@utils/*": ["./src/utils/*"],
       "@class/*": ["./src/class/*"],
       "@type/*": ["./src/type/*"],
-
     }, 
     "outDir": "./dist/",
     "sourceMap": true,

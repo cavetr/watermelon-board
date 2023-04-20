@@ -27,6 +27,7 @@ function init() {
       drawingBoard.delate(id);
     });
     ws.on(ST.INIT, data => {
+      console.log(data);
       board.init(data);
     });
     ws.on(ST.ADD, data => {
@@ -39,5 +40,8 @@ function init() {
 }
 function initWs() {
   ws.on('connect', init);
+  ws.on('connect_error', (err) => {
+    console.log(err);
+  })
 }
 initWs();

@@ -17,7 +17,7 @@ class Text extends DrawingBoard {
         canvas.getContext('2d')?.fillText(inputEl.value, positionX, positionY);
         pipe.emit('draw', {
           boardId: canvas.id,
-          id: '1',
+          shapeId: '1',
           data: {
             lineWidth: 1,
             lineColor: 1,

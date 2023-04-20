@@ -44,7 +44,7 @@ class Circle extends DrawingBoard {
     canvas.onmouseleave = null;
     pipe.emit('draw', {
       boardId: canvas.id,
-      id: '1',
+      shapeId: '1',
       data: {
         lineWidth: 1,
         lineColor: 1,

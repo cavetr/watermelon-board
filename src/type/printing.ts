@@ -27,6 +27,6 @@ interface IPrintingData {
 }
 export interface IPrinting {
   boardId?: Id; // 画板id，客户端生成，用于重绘时删除
-  id: Id;
+  shapeId: Id;
   data: IPrintingData; // 图形数据
 }

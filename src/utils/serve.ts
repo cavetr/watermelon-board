@@ -1,7 +1,10 @@
 import { ST } from "@type/const";
 import { IApi } from "@type/option";
 import { io, Socket } from "socket.io-client";
-const IP = `ws://localhost:4000/${location.search.slice(3)}?isd=1`;
+import Qs from 'qs';
+const searchParam = Qs.parse(location.search.slice(1));
+console.log(searchParam)
+const IP = `ws://localhost:4000/${searchParam.a}?isd=1&&key=123`;
 
 interface ServerToClientEvents{
   [ST.INIT]: (data: IApi) => void;
