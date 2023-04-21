@@ -1,45 +1,33 @@
-import DrawingBoard from "@class/DrawingBoardManager/DrawingBoard/index";
-import Pen from "@class/DrawingBoardManager/DrawingBoard/Pen";
-import Text from '@class/DrawingBoardManager/DrawingBoard/Text';
-import Circle from "@class/DrawingBoardManager/DrawingBoard/Circle";
-import Rectangle from "@class/DrawingBoardManager/DrawingBoard/Rectangle";
 import { PrintingType } from "@type/const";
-
+import Text from "@class/Shape/Text";
+import ShapeFactory from "@class/Shape/ShapeFactory";
 class DrawingBoardManager {
-  private boards = new Map<Id, DrawingBoard>();
+  private boardMap = new Map<Id, HTMLCanvasElement>();
   private printingType = PrintingType.PEN;
-  // private 
-  constructor() { }
+  constructor() {
+    document.querySelectorAll('button').forEach(button => {
+      button.onclick = () => {
+        this.changePrinting(button.id as PrintingType);
+      }
+    });
+  }
   changePrinting(newPrintingType: PrintingType) {
     this.printingType = newPrintingType;
   }
   delate(id: Id) {
-    if (this.boards.has(id)) {
-      this.boards.get(id)?.destroy();
-      this.boards.delete(id);
+    if (this.boardMap.has(id)) {
+      this.boardMap.get(id)?.remove();
+      this.boardMap.delete(id);
     }
   }
-  create(): HTMLCanvasElement {
-    const newId = crypto.randomUUID();
-    const newCanvas = document.createElement('canvas');
-    newCanvas.className = 'drawing-board';
-    newCanvas.id = newId;
-    this.boards.set(newId, new (this.createNewPrinting())(newCanvas));
-    return newCanvas;
-  }
-  private createNewPrinting(): typeof DrawingBoard {
-    switch (this.printingType) {
-      case PrintingType.PEN:
-        return Pen;
-      case PrintingType.CIRCLE:
-        return Circle;
-      case PrintingType.TEXT:
-        return Text;
-      case PrintingType.RECTANGLE:
-        return Rectangle;
-      default:
-        return DrawingBoard;
-    }
+  create(e: MouseEvent): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    const id = crypto.randomUUID();
+    canvas.className = 'drawing-board';
+    canvas.id = id;
+    ShapeFactory.getInitCanvasFn(this.printingType)(canvas, e);
+    this.boardMap.set(id, canvas);
+    return canvas;
   }
 }
 export default DrawingBoardManager;

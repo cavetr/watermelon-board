@@ -8,21 +8,10 @@ function init() {
   ws.once(ST.INIT, initData => {
     const boardDiv = document.getElementById('board');
     if (boardDiv) {
-      const drawingBoard = new DrawingBoardManager();
-      document.querySelectorAll('button').forEach(button => {
-        button.onclick = () => {
-          drawingBoard.changePrinting(button.id as PrintingType);
-        }
-      })
-      boardDiv.addEventListener('mousedown', () => {
-        boardDiv.appendChild(drawingBoard.create());
-      });
-      pipe.on('printing', id => {
-        drawingBoard.delate(id);
-      });
       console.log(initData);
       const boardManager = new BoardManager(initData);
       ws.on(ST.ADD, data => {
+        console.log(data, boardManager.getVersion());
         boardManager.addOption(data);
       });
       ws.on(ST.DELETE, data => {

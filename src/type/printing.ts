@@ -1,4 +1,10 @@
-import { PrintingType } from "./const";
+
+enum PrintingType {
+  PEN = 'pen',
+  CIRCLE = 'circle',
+  RECTANGLE = 'rectangle',
+  TEXT = 'text',
+}
 interface IPenData {
   pointList: [number, number][];
 }
@@ -38,13 +44,12 @@ interface ITextPrintingData {
   type: PrintingType.TEXT;
   data: ITextData;
 }
-
 type PrintingDateType = IPenPrintingData | ICirclePrintingData | IRectanglePrintingData | ITextPrintingData;
-export type IPrintingData = {
+type IPrintingData = {
   lineWidth: number; // 线条粗细 | 字体大小
   lineColor: number; // 线条字体颜色
 } & PrintingDateType;
-export interface IPrinting {
+interface IPrinting {
   boardId?: Id; // 画板id，客户端生成，用于重绘时删除
   shapeId: Id;
   data: IPrintingData; // 图形数据

@@ -1,5 +1,3 @@
-import { IPrinting } from "@type/printing";
-
 interface EventsMap {
   [event: string]: any;
 }
