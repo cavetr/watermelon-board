@@ -1,42 +1,46 @@
 import DrawingBoardManager from '@class/DrawingBoardManager/index';
-import PrintingBoard from '@class/PrintingBoard/index';
 import ws from '@utils/serve';
 import pipe from '@utils/pipe';
 import { PrintingType, ST } from '@type/const';
-
-let board: PrintingBoard;
-
-
+import BoardManager from '@class/BoardManager';
 
 function init() {
-  const boardDiv = document.getElementById('board');
-  const printingBoard = document.getElementById('printing-board');
-  if (boardDiv && printingBoard) {
-    // const { left: offsetX, top: offsetY } = boardDiv.getBoundingClientRect();
-    const drawingBoard = new DrawingBoardManager();
-    document.querySelectorAll('button').forEach(button => {
-      button.onclick = () => {
-        drawingBoard.changePrinting(button.id as PrintingType);
-      }
-    })
-    board = new PrintingBoard(printingBoard as HTMLCanvasElement);
-    boardDiv.addEventListener('mousedown', () => {
-      boardDiv.appendChild(drawingBoard.create());
-    });
-    pipe.on('printing', id => {
-      drawingBoard.delate(id);
-    });
-    ws.on(ST.INIT, data => {
-      console.log(data);
-      board.init(data);
-    });
-    ws.on(ST.ADD, data => {
-      board.addOption(data);
-    });
-    ws.on(ST.DELETE, data => {
-      board.addOption(data);
-    });
-  }
+  ws.once(ST.INIT, initData => {
+    const boardDiv = document.getElementById('board');
+    if (boardDiv) {
+      const drawingBoard = new DrawingBoardManager();
+      document.querySelectorAll('button').forEach(button => {
+        button.onclick = () => {
+          drawingBoard.changePrinting(button.id as PrintingType);
+        }
+      })
+      boardDiv.addEventListener('mousedown', () => {
+        boardDiv.appendChild(drawingBoard.create());
+      });
+      pipe.on('printing', id => {
+        drawingBoard.delate(id);
+      });
+      console.log(initData);
+      const boardManager = new BoardManager(initData);
+      ws.on(ST.ADD, data => {
+        boardManager.addOption(data);
+      });
+      ws.on(ST.DELETE, data => {
+        boardManager.addOption(data);
+      });
+      pipe.on('draw', data => {
+        ws.emit(ST.ADD, {
+          version: boardManager.getVersion(),
+          data: {
+            data: {
+              printing: data,
+            },
+            type: ST.ADD,
+          }
+        })
+      });
+    }
+  });
 }
 function initWs() {
   ws.on('connect', init);

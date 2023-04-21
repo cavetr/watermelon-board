@@ -24,6 +24,8 @@ class Text extends DrawingBoard {
             type: PrintingType.TEXT,
             data: {
               text: inputEl.value,
+              positionX,
+              positionY,
             }
           }
         })

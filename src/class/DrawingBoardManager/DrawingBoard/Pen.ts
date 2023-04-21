@@ -6,7 +6,7 @@ class Pen extends DrawingBoard {
   private ctx: CanvasRenderingContext2D;
   private lastPositionX: number | undefined;
   private lastPositionY: number | undefined;
-  private data: [number, number][] = [];
+  private data: [number, number][] = [] ;
   constructor(canvas: HTMLCanvasElement) {
     super(canvas);
     const destroy = this.drawOver.bind(this, canvas);

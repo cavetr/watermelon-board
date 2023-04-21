@@ -3,22 +3,38 @@ import { IPrinting } from "@type/printing";
 
 
 
-export interface IInitOption {
+export interface IInitDataOption {
   printingList: IPrinting[];
 }
-export interface IAddOption {
-  printing: IPrinting;
+export interface IInitOption {
+  type: ST.INIT;
+  data: IInitDataOption;
 }
-export interface IDeleteOption {
-  id: Id;
-}
-export type OptionDataType = IInitOption | IAddOption | IDeleteOption;
-export interface IOption {
-  type: ST;
-  data: OptionDataType;
+export interface IInitApi {
+  version: Version;
+  data: IInitOption;
 }
 
-export interface IApi {
+export interface IAddOption {
+  type: ST.ADD;
+  data: IAddDataOption;
+}
+export interface IAddDataOption {
+  printing: IPrinting;
+}
+export interface IAddApi {
   version: Version;
-  data: IOption;
+  data: IAddOption;
+}
+
+export interface IDeleteOption {
+  type: ST.DELETE;
+  data: IDeleteDataOption;
+}
+export interface IDeleteDataOption {
+  id: Id;
+}
+export interface IDeleteApi {
+  version: Version;
+  data: IDeleteOption;
 }

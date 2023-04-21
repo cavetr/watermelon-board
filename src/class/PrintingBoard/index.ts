@@ -1,38 +1,29 @@
 import LinkList from '@class/LinkList/index';
-import { PrintingType, ST } from '@type/const';
-import { IAddOption, IApi, IDeleteOption, IInitOption, IOption } from '@type/option';
-import { IPrinting } from '@type/printing';
+import Shape from '@class/Shape';
+import Circle from '@class/Shape/Circle';
+import Pen from '@class/Shape/Pen';
+import Rectangle from '@class/Shape/Rectangle';
+import Text from '@class/Shape/Text';
+import { PrintingType } from '@type/const';
+import { IPrinting, IPrintingData } from '@type/printing';
 import pipe from '@utils/pipe';
-import ws from '@utils/serve';
 const reDrawTime = 1000;
+type ShapeClass = Pen | Text | Circle | Rectangle
 class PrintingBoard {
-  private shapeList: LinkList<IPrinting, Id> = new LinkList();
+  private shapeList: LinkList<Shape, Id> = new LinkList();
   private ctx: CanvasRenderingContext2D;
-  private waitOptMap = new Map<Version, IOption>();
-  private version: Version = -1;
   private reDrawTimeOutId: number | undefined;
   constructor(canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-    pipe.on('draw', data => {
-      ws.emit(ST.ADD, {
-        version: this.version,
-        data: {
-          data: {
-            printing: data,
-          },
-          type: ST.ADD,
-        }
-      })
-    });
   }
-  private addShape(shape: IPrinting) {
-    this.shapeList.addNode(shape.shapeId, shape);
+  addShape(printing: IPrinting) {
+    this.shapeList.addNode(printing.shapeId, this.createNewPrinting(printing.data));
   }
-  private deleteShape(id: Id) {
+  deleteShape(id: Id) {
     this.shapeList.deleteNode(id);
     this.reDraw();
   }
-  private reDraw() {
+  reDraw() {
     if (this.reDrawTimeOutId !== void 0) {
       clearTimeout(this.reDrawTimeOutId);
       this.reDrawTimeOutId = void 0;
@@ -40,16 +31,7 @@ class PrintingBoard {
     console.log('redraw');
     this.shapeList.forEach((id, printing) => {
       // 图形绘制逻辑
-      switch (printing.data.type) {
-        case PrintingType.PEN:
-          break;
-        case PrintingType.RECTANGLE:
-          break;
-        case PrintingType.CIRCLE:
-          break;
-        case PrintingType.TEXT:
-          break;
-      }
+      printing.draw(this.ctx);
       // 删除逻辑
       pipe.emit('printing', id);
     });
@@ -57,37 +39,28 @@ class PrintingBoard {
       this.reDraw();
     }, reDrawTime);
   }
-  init({ version, data }: IApi) {
-    this.version = version;
-    const initData = (data.data as IInitOption).printingList;
-    for (const printing of initData) {
-      this.addShape(printing);
-    }
-    this.reDraw();
-  }
-  addOption({ version, data: opt }: IApi) {
-    this.waitOptMap.set(version, opt);
-    this.tryDoWaitOpt();
-  }
-  private tryDoWaitOpt() {
-    const nextVersion = this.version + 1;
-    if (this.waitOptMap.has(nextVersion)) {
-      const opt = this.waitOptMap.get(nextVersion);
-      if (opt) {
-        switch (opt.type) {
-          case ST.ADD:
-            this.addShape((opt.data as IAddOption).printing);
-            break;
-          case ST.DELETE:
-            this.deleteShape((opt.data as IDeleteOption).id);
-            break;
-          default:
-            throw '什么东西？？';
-        }
-      }
-      this.version = nextVersion;
-      this.waitOptMap.delete(nextVersion);
-      this.tryDoWaitOpt();
+  private createNewPrinting(printingData: IPrintingData): ShapeClass {
+    switch (printingData.type) {
+      case PrintingType.PEN:
+        return new Pen(printingData.data.pointList);
+      case PrintingType.CIRCLE:
+        return new Circle(
+          printingData.data.beginPositionX,
+          printingData.data.beginPositionY,
+          printingData.data.endPositionX,
+          printingData.data.endPositionY,
+        );
+      case PrintingType.TEXT:
+        return new Text(printingData.data.text, printingData.data.positionX, printingData.data.positionY);
+      case PrintingType.RECTANGLE:
+        return new Rectangle(
+          printingData.data.beginPositionX,
+          printingData.data.beginPositionY,
+          printingData.data.endPositionX,
+          printingData.data.endPositionY,
+        );
+      default:
+        throw '什么东西？？';
     }
   }
 }
