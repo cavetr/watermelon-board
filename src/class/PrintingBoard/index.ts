@@ -7,6 +7,7 @@ class PrintingBoard {
   private shapeList: LinkList<Shape, Id> = new LinkList();
   private ctx: CanvasRenderingContext2D;
   private reDrawTimeOutId: number | undefined;
+  private shapeIdToBoardIdMap: Map<Id, Id> = new Map();
   readonly width: number;
   readonly height: number;
   constructor(canvas: HTMLCanvasElement) {
@@ -15,6 +16,7 @@ class PrintingBoard {
     this.height = canvas.height;
   }
   addShape(printing: IPrinting) {
+    this.shapeIdToBoardIdMap.set(printing.shapeId, printing.boardId);
     this.shapeList.addNode(printing.shapeId, ShapeFactory.getShape(printing.data));
   }
   deleteShape(id: Id) {
@@ -30,9 +32,13 @@ class PrintingBoard {
     console.log('redraw');
     this.shapeList.forEach((id, printing) => {
       // 图形绘制逻辑
+      const boardId = this.shapeIdToBoardIdMap.get(id);
+      this.shapeIdToBoardIdMap.delete(id);
+      if (boardId) {
+        // 删除逻辑
+        pipe.emit('printing', boardId);
+      }
       printing.draw(this.ctx);
-      // 删除逻辑
-      pipe.emit('printing', id);
     });
     this.reDrawTimeOutId = setTimeout(() => {
       this.reDraw();

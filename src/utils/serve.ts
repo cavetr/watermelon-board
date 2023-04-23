@@ -1,10 +1,9 @@
 import { ST } from "@type/const";
-import { IAddApi, IDeleteApi, IInitApi } from "@type/option";
 import { io, Socket } from "socket.io-client";
 import Qs from 'qs';
 const searchParam = Qs.parse(location.search.slice(1));
 console.log(searchParam);
-const IP = `ws://localhost:4000/${searchParam.a}?isd=1&&key=123`;
+const IP = `ws://localhost:4000/${searchParam.a}?isd=1&&key=abs`;
 
 interface ServerToClientEvents{
   [ST.INIT]: (data: IInitApi) => void;

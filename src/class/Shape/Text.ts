@@ -4,11 +4,12 @@ import { PrintingType } from "@type/const";
 
 class Text extends Shape {
   constructor(
+    lineType: PrintingLineType,
     private text: string,
     private positionX: number,
     private positionY: number,
   ) {
-    super();
+    super(lineType.lineWidth, lineType.lineColor);
   }
   draw(board: CanvasRenderingContext2D): void {
     Text.draw(board, this);
@@ -24,11 +25,20 @@ class Text extends Shape {
     this.positionY = positionY;
     return this;
   }
-  static from(data: ITextData): Text {
-    return new Text(data.text, data.positionX, data.positionY);
+  static from(
+    lineType: PrintingLineType,
+    data: ITextData
+  ): Text {
+    return new Text(
+      lineType,
+      data.text,
+      data.positionX,
+      data.positionY
+    );
   }
-  value(): ITextPrintingData {
+  value(): IPrintingData<ITextPrintingData> {
     return {
+      ...super.lineValue(),
       type: PrintingType.TEXT,
       data: {
         text: this.text,
@@ -38,6 +48,8 @@ class Text extends Shape {
     };
   }
   static draw(board: CanvasRenderingContext2D, shape: Text): void {
+    board.fillStyle = shape.lineColor;
+    board.font = `${shape.lineWidth * 5}px Arial`;
     board.fillText(shape.text, shape.positionX, shape.positionY);
   }
 }

@@ -1,39 +1,40 @@
-import { ST } from "@type/const";
-
-
-
-export interface IInitDataOption {
+enum ST {
+  INIT = 'init',
+  ADD = 'add',
+  DELETE = 'delete',
+}
+interface IInitDataOption {
   printingList: IPrinting[];
 }
-export interface IInitOption {
+interface IInitOption {
   type: ST.INIT;
   data: IInitDataOption;
 }
-export interface IInitApi {
+interface IInitApi {
   version: Version;
   data: IInitOption;
 }
 
-export interface IAddOption {
+interface IAddOption {
   type: ST.ADD;
   data: IAddDataOption;
 }
-export interface IAddDataOption {
+interface IAddDataOption {
   printing: IPrinting;
 }
-export interface IAddApi {
+interface IAddApi {
   version: Version;
   data: IAddOption;
 }
 
-export interface IDeleteOption {
+interface IDeleteOption {
   type: ST.DELETE;
   data: IDeleteDataOption;
 }
-export interface IDeleteDataOption {
+interface IDeleteDataOption {
   id: Id;
 }
-export interface IDeleteApi {
+interface IDeleteApi {
   version: Version;
   data: IDeleteOption;
 }

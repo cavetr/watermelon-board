@@ -45,12 +45,14 @@ interface ITextPrintingData {
   data: ITextData;
 }
 type PrintingDateType = IPenPrintingData | ICirclePrintingData | IRectanglePrintingData | ITextPrintingData;
-type IPrintingData = {
-  lineWidth: number; // 线条粗细 | 字体大小
-  lineColor: number; // 线条字体颜色
-} & PrintingDateType;
+type PrintingLineType = {
+  lineWidth: number;
+  lineColor: string;
+}
+
+type IPrintingData<T extends PrintingDateType = PrintingDateType> = PrintingLineType & T;
 interface IPrinting {
-  boardId?: Id; // 画板id，客户端生成，用于重绘时删除
+  boardId: Id; // 画板id，客户端生成，用于重绘时删除
   shapeId: Id;
   data: IPrintingData; // 图形数据
 }

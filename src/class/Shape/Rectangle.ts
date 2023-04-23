@@ -3,12 +3,13 @@ import { PrintingType } from "@type/const";
 
 class Rectangle extends Shape {
   constructor(
+    lineType: PrintingLineType,
     private beginPositionX: number,
     private beginPositionY: number,
     private endPositionX: number,
     private endPositionY: number,
   ) {
-    super();
+    super(lineType.lineWidth, lineType.lineColor);
   }
   draw(board: CanvasRenderingContext2D): void {
     Rectangle.draw(board, this);
@@ -31,8 +32,9 @@ class Rectangle extends Shape {
     this.endPositionY = endPositionY;
     return this;
   }
-  value(): IRectanglePrintingData {
+  value(): IPrintingData<IRectanglePrintingData> {
     return {
+      ...super.lineValue(),
       type: PrintingType.RECTANGLE,
       data: {
         beginPositionX: this.beginPositionX,
@@ -42,8 +44,12 @@ class Rectangle extends Shape {
       },
     };
   }
-  static from(data: IRectangleData): Rectangle {
+  static from(
+    lineType: PrintingLineType,
+    data: IRectangleData
+  ): Rectangle {
     return new Rectangle(
+      lineType,
       data.beginPositionX,
       data.beginPositionY,
       data.endPositionX,
@@ -51,6 +57,8 @@ class Rectangle extends Shape {
     );
   }
   static draw(board: CanvasRenderingContext2D, shape: Rectangle): void {
+    board.strokeStyle = shape.lineColor;
+    board.lineWidth = shape.lineWidth;
     board.beginPath();
     board.rect(
       Math.min(shape.endPositionX, shape.beginPositionX),

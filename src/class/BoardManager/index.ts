@@ -1,24 +1,23 @@
 import DrawingBoardManager from "@class/DrawingBoardManager";
 import PrintingBoard from "@class/PrintingBoard";
 import { ST } from "@type/const";
-import { IAddApi, IAddOption, IDeleteApi, IDeleteOption, IInitApi } from "@type/option";
 import pipe from "@utils/pipe";
 type IApi = IDeleteApi | IAddApi;
 type IOption = IAddOption | IDeleteOption;
 class BoardManager {
-  private drawingBoard;
+  private drawingBoardManager;
   private printingBoard;
   private version: Version;
   private waitOptMap = new Map<Version, IOption>();
   constructor({ version, data }: IInitApi) {
-    this.drawingBoard = new DrawingBoardManager();
+    this.drawingBoardManager = new DrawingBoardManager();
     this.printingBoard = new PrintingBoard(document.getElementById('printing-board') as HTMLCanvasElement);
     const boardDiv = document.getElementById('board') as HTMLDivElement;
     boardDiv.addEventListener('mousedown', e => {
-      boardDiv.appendChild(this.drawingBoard.create(e));
+      boardDiv.appendChild(this.drawingBoardManager.create(e));
     });
     pipe.on('printing', id => {
-      this.drawingBoard.delate(id);
+      this.drawingBoardManager.delate(id);
     });
     this.version = version;
     const initData = data.data.printingList;

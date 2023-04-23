@@ -1,5 +1,4 @@
 import { PrintingType } from "@type/const";
-import Text from "@class/Shape/Text";
 import ShapeFactory from "@class/Shape/ShapeFactory";
 class DrawingBoardManager {
   private boardMap = new Map<Id, HTMLCanvasElement>();
@@ -25,7 +24,11 @@ class DrawingBoardManager {
     const id = crypto.randomUUID();
     canvas.className = 'drawing-board';
     canvas.id = id;
-    ShapeFactory.getInitCanvasFn(this.printingType)(canvas, e);
+    const lineType = {
+      lineColor: (document.querySelector('#color') as HTMLInputElement).value,
+      lineWidth: Number((document.querySelector('#width') as HTMLInputElement).value),
+    };
+    ShapeFactory.getInitCanvasFn(this.printingType)(canvas, lineType, e);
     this.boardMap.set(id, canvas);
     return canvas;
   }

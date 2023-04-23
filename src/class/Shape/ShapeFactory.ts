@@ -5,8 +5,8 @@ import Rectangle from "./Rectangle";
 import Text from "./Text";
 import Shape from ".";
 import pipe from "@utils/pipe";
-type initFn = (canvas: HTMLCanvasElement, e: MouseEvent) => void;
-function initTextBoard(canvas: HTMLCanvasElement) {
+type initFn = (canvas: HTMLCanvasElement, lineType: PrintingLineType, e: MouseEvent) => void;
+function initTextBoard(canvas: HTMLCanvasElement, lineType: PrintingLineType) {
   canvas.onmouseup = e => {
     const { left: offsetX, top: offsetY } = document.getElementById('board')?.getBoundingClientRect() ?? { left: 0, top: 0 };
     const positionX = e.clientX - (offsetX);
@@ -18,20 +18,17 @@ function initTextBoard(canvas: HTMLCanvasElement) {
     document.getElementById('board')?.appendChild(inputEl);
     inputEl.focus();
     inputEl.onblur = () => {
-      canvas.getContext('2d')?.fillText(inputEl.value, positionX, positionY);
+      const text = new Text(
+        lineType,
+        inputEl.value,
+        positionX,
+        positionY,
+      );
+      text.draw(canvas.getContext('2d') as CanvasRenderingContext2D);
       pipe.emit('draw', {
         boardId: canvas.id,
         shapeId: '1',
-        data: {
-          lineWidth: 1,
-          lineColor: 1,
-          type: PrintingType.TEXT,
-          data: {
-            text: inputEl.value,
-            positionX,
-            positionY,
-          }
-        }
+        data: text.value(),
       });
       inputEl.remove();
     }
@@ -39,11 +36,12 @@ function initTextBoard(canvas: HTMLCanvasElement) {
 }
 
 function getInitOtherBoardFn(type: PrintingType): initFn {
-  return function (canvas, e) {
+  return function (canvas, lineType, e) {
+    console.log(lineType);
     const { left: offsetX, top: offsetY } = document.getElementById('board')?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    const shape = ShapeFactory.getShapeFromPoint([e.clientX - offsetX, e.clientY - offsetY], type);
+    const shape = ShapeFactory.getShapeFromPoint(lineType, [e.clientX - offsetX, e.clientY - offsetY], type);
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    canvas.onmousemove = function (ev) { shape.addPath(ctx, [ev.clientX- offsetX, ev.clientY - offsetY]) };
+    canvas.onmousemove = function (ev) { shape.addPath(ctx, [ev.clientX - offsetX, ev.clientY - offsetY]) };
     canvas.onmouseleave = drawOver;
     canvas.onmouseup = drawOver;
     function drawOver() {
@@ -53,11 +51,7 @@ function getInitOtherBoardFn(type: PrintingType): initFn {
       pipe.emit('draw', {
         boardId: canvas.id,
         shapeId: '1',
-        data: {
-          lineWidth: 1,
-          lineColor: 1,
-          ...shape.value(),
-        }
+        data: shape.value(),
       })
     }
   }
@@ -70,30 +64,39 @@ class ShapeFactory {
       return getInitOtherBoardFn(type);
     }
   }
-  static getShapeFromPoint(point: Point, type: PrintingType): Shape {
+  static getShapeFromPoint(lineType: PrintingLineType, point: Point, type: PrintingType): Shape {
     switch (type) {
       case PrintingType.PEN:
-        return new Pen([point]);
+        return new Pen(lineType, [point]);
       case PrintingType.CIRCLE:
-        return new Circle(point[0], point[1], point[0], point[1]);
+        return new Circle(lineType, point[0], point[1], point[0], point[1]);
       case PrintingType.TEXT:
-        return new Text('', point[0], point[1]);
+        return new Text(lineType, '', point[0], point[1]);
       case PrintingType.RECTANGLE:
-        return new Rectangle(point[0], point[1], point[0], point[1]);
+        return new Rectangle(lineType, point[0], point[1], point[0], point[1]);
       default:
         throw '什么东西？？';
     }
   }
-  static getShape({ data, type }: IPrintingData): Shape {
+  static getShape({
+    lineWidth,
+    lineColor,
+    data,
+    type
+  }: IPrintingData): Shape {
+    const lineType: PrintingLineType = {
+      lineColor,
+      lineWidth,
+    }
     switch (type) {
       case PrintingType.PEN:
-        return Pen.from(data);
+        return Pen.from(lineType, data);
       case PrintingType.CIRCLE:
-        return Circle.from(data);
+        return Circle.from(lineType, data);
       case PrintingType.TEXT:
-        return Text.from(data);
+        return Text.from(lineType, data);
       case PrintingType.RECTANGLE:
-        return Rectangle.from(data);
+        return Rectangle.from(lineType, data);
       default:
         throw '什么东西？？';
     }

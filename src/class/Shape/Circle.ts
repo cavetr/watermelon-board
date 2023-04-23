@@ -3,12 +3,13 @@ import { PrintingType } from "@type/const";
 
 class Circle extends Shape {
   constructor(
+    lineType: PrintingLineType,
     private beginPositionX: number,
     private beginPositionY: number,
     private endPositionX: number,
     private endPositionY: number,
   ) {
-    super();
+    super(lineType.lineWidth, lineType.lineColor);
   }
   draw(board: CanvasRenderingContext2D): void {
     Circle.draw(board, this);
@@ -31,16 +32,21 @@ class Circle extends Shape {
     this.endPositionY = endPositionY;
     return this;
   }
-  static from(data: ICircleData): Circle {
+  static from(
+    lineType: PrintingLineType,
+    data: ICircleData
+  ): Circle {
     return new Circle(
+      lineType,
       data.beginPositionX,
       data.beginPositionY,
       data.endPositionX,
       data.endPositionY,
     );
   }
-  value(): ICirclePrintingData {
+  value(): IPrintingData<ICirclePrintingData> {
     return {
+      ...super.lineValue(),
       type: PrintingType.CIRCLE,
       data: {
         beginPositionX: this.beginPositionX,
@@ -51,6 +57,8 @@ class Circle extends Shape {
     };
   }
   static draw(board: CanvasRenderingContext2D, shape: Circle): void {
+    board.strokeStyle = shape.lineColor;
+    board.lineWidth = shape.lineWidth;
     board.beginPath();
     board.ellipse(
       (shape.endPositionX + shape.beginPositionX) / 2,
