@@ -11,20 +11,6 @@ class Text extends Shape {
   ) {
     super(lineType.lineWidth, lineType.lineColor);
   }
-  draw(board: CanvasRenderingContext2D): void {
-    Text.draw(board, this);
-  }
-  addPath(): void { }
-  reset({
-    text,
-    positionX,
-    positionY,
-  } = this): this {
-    this.text = text;
-    this.positionX = positionX;
-    this.positionY = positionY;
-    return this;
-  }
   static from(
     lineType: PrintingLineType,
     data: ITextData
@@ -36,9 +22,16 @@ class Text extends Shape {
       data.positionY
     );
   }
-  value(): IPrintingData<ITextPrintingData> {
+  addPath(): void { }
+  reset(text: string): this {
+    this.text = text;
+    return this;
+  }
+  _draw(board: CanvasRenderingContext2D): void {
+    board.fillText(this.text, this.positionX, this.positionY);
+  }
+  _value(): ITextPrintingData {
     return {
-      ...super.lineValue(),
       type: PrintingType.TEXT,
       data: {
         text: this.text,
@@ -46,11 +39,6 @@ class Text extends Shape {
         positionY: this.positionY,
       }
     };
-  }
-  static draw(board: CanvasRenderingContext2D, shape: Text): void {
-    board.fillStyle = shape.lineColor;
-    board.font = `${shape.lineWidth * 5}px Arial`;
-    board.fillText(shape.text, shape.positionX, shape.positionY);
   }
 }
 export default Text;

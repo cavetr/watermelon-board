@@ -1,29 +1,31 @@
-class LinkNode<NodeValType> {
-  next: LinkNode<NodeValType> | null;
-  previous: LinkNode<NodeValType> | null;
+class LinkNode<KeyType, NodeValType> {
+  next: LinkNode<KeyType, NodeValType> | null;
+  previous: LinkNode<KeyType, NodeValType> | null;
   val: NodeValType;
-  constructor(val: NodeValType, next: LinkNode<NodeValType> | null = null, previous: LinkNode<NodeValType> | null = null) {
+  id: KeyType;
+  constructor(id: KeyType, val: NodeValType, next: LinkNode<KeyType, NodeValType> | null = null, previous: LinkNode<KeyType, NodeValType> | null = null) {
     this.next = next;
     this.val = val;
     this.previous = previous;
+    this.id = id;
   }
 }
 
-class LinkList<NodeValType, KeyType> {
-  private head: LinkNode<NodeValType> | null = null;
-  private tail: LinkNode<NodeValType> | null = null;
-  private idNodeMap: Map<KeyType, LinkNode<NodeValType>> = new Map();
+class LinkList<KeyType, NodeValType> {
+  private head: LinkNode<KeyType, NodeValType> | null = null;
+  private tail: LinkNode<KeyType, NodeValType> | null = null;
+   idNodeMap: Map<KeyType, LinkNode<KeyType, NodeValType>> = new Map();
   constructor() { }
   addNode(id: KeyType, newVal: NodeValType) {
-    const newNode = new LinkNode(newVal, null, this.tail);
+    const newNode = new LinkNode(id, newVal, null, this.tail);
     if (this.tail === null || this.head === null) {
       this.head = newNode;
       this.tail = newNode;
     } else {
       this.tail.next = newNode;
       this.tail = newNode;
-      this.idNodeMap.set(id, newNode);
     }
+    this.idNodeMap.set(id, newNode);
   }
   deleteNode(id: KeyType) {
     const needDeleteNode = this.idNodeMap.get(id);
@@ -42,9 +44,29 @@ class LinkList<NodeValType, KeyType> {
     }
     this.idNodeMap.delete(id);
   }
-  forEach(fn: (id: KeyType, node: NodeValType) => void) { 
-    for(const [id, node] of this.idNodeMap) {
-      fn(id, node.val);
+  clear() {
+    this.tail === null;
+    this.head === null;
+    this.idNodeMap.clear();
+  }
+  getNodeValFromId(id: KeyType): NodeValType | -1 {
+    return this.idNodeMap.get(id)?.val ?? -1;
+  }
+  findLastOneId(fn: (id: KeyType, node: NodeValType) => boolean): KeyType | -1 {
+    let node = this.tail;
+    while(node) {
+      if(fn(node.id, node.val)) {
+        return node.id;
+      }
+      node = node.previous;
+    }
+    return -1;
+  }
+  forEach(fn: (id: KeyType, node: NodeValType) => void) {
+    let node = this.head;
+    while(node) {
+      fn(node.id, node.val);
+      node = node.next;
     }
   }
 }

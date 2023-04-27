@@ -11,9 +11,7 @@ class Rectangle extends Shape {
   ) {
     super(lineType.lineWidth, lineType.lineColor);
   }
-  draw(board: CanvasRenderingContext2D): void {
-    Rectangle.draw(board, this);
-  }
+  
   addPath(board: CanvasRenderingContext2D, nextPoint: Point): void {
     board.clearRect(0, 0, board.canvas.width, board.canvas.height);
     this.endPositionX = nextPoint[0];
@@ -32,18 +30,6 @@ class Rectangle extends Shape {
     this.endPositionY = endPositionY;
     return this;
   }
-  value(): IPrintingData<IRectanglePrintingData> {
-    return {
-      ...super.lineValue(),
-      type: PrintingType.RECTANGLE,
-      data: {
-        beginPositionX: this.beginPositionX,
-        beginPositionY: this.beginPositionY,
-        endPositionX: this.endPositionX,
-        endPositionY: this.endPositionY,
-      },
-    };
-  }
   static from(
     lineType: PrintingLineType,
     data: IRectangleData
@@ -56,18 +42,27 @@ class Rectangle extends Shape {
       data.endPositionY,
     );
   }
-  static draw(board: CanvasRenderingContext2D, shape: Rectangle): void {
-    board.strokeStyle = shape.lineColor;
-    board.lineWidth = shape.lineWidth;
+  _draw(board: CanvasRenderingContext2D): void {
     board.beginPath();
     board.rect(
-      Math.min(shape.endPositionX, shape.beginPositionX),
-      Math.min(shape.endPositionY, shape.beginPositionY),
-      Math.abs(shape.endPositionX - shape.beginPositionX),
-      Math.abs(shape.endPositionY - shape.beginPositionY),
+      Math.min(this.endPositionX, this.beginPositionX),
+      Math.min(this.endPositionY, this.beginPositionY),
+      Math.abs(this.endPositionX - this.beginPositionX),
+      Math.abs(this.endPositionY - this.beginPositionY),
     );
     board.closePath();
     board.stroke();
+  }
+  _value(): IRectanglePrintingData {
+    return {
+      type: PrintingType.RECTANGLE,
+      data: {
+        beginPositionX: this.beginPositionX,
+        beginPositionY: this.beginPositionY,
+        endPositionX: this.endPositionX,
+        endPositionY: this.endPositionY,
+      },
+    };
   }
 }
 export default Rectangle;

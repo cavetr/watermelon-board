@@ -85,7 +85,20 @@ const config = {
       },
       {
         test: /\.css$/i,
-        use: [stylesHandler, "css-loader", "postcss-loader"],
+        use: [
+          stylesHandler,
+          "@teamsupercell/typings-for-css-modules-loader",
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 2,
+              modules: {
+                localIdentName: "[name]-[local]-[chunkhash:8]",
+              },
+            },
+          },
+          "postcss-loader"
+        ],
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,

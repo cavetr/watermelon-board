@@ -7,20 +7,19 @@ class Pen extends Shape {
   ) {
     super(lineType.lineWidth, lineType.lineColor);
   }
-  draw(board: CanvasRenderingContext2D): void {
-    Pen.draw(board, this.pointList, this);
-  }
+
   addPath(board: CanvasRenderingContext2D, nextPoint: Point): void {
     this.pointList.push(nextPoint);
-    const prePoint = this.pointList.length === 1 ? nextPoint : this.pointList[this.pointList.length - 2];
-    Pen.draw(board, [prePoint, nextPoint], this);
+    if (this.pointList.length === 1) {
+      this.pointList.push([nextPoint[0], nextPoint[1]]);
+    }
+    this.draw(board);
   }
   reset(): this {
     return this;
   }
-  value(): IPrintingData<IPenPrintingData> {
+  _value(): IPenPrintingData {
     return {
-      ...super.lineValue(),
       type: PrintingType.PEN,
       data: {
         pointList: this.pointList,
@@ -33,10 +32,9 @@ class Pen extends Shape {
   ): Pen {
     return new Pen(lineType, data.pointList);
   }
-  static draw(board: CanvasRenderingContext2D, data: Point[], shape: Pen): void {
+  _draw(board: CanvasRenderingContext2D): void {
+    const data = this.pointList;
     board.beginPath();
-    board.strokeStyle = shape.lineColor;
-    board.lineWidth = shape.lineWidth;
     let prePoint = data[0];
     for (let i = 0; i < data.length; i++) {
       const nextPoint = data[i];

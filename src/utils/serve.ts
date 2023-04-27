@@ -13,6 +13,7 @@ interface ServerToClientEvents{
 interface ClientToServerEvents {
   [ST.ADD]: (data: IAddApi) => void;
   [ST.DELETE]: (data: IDeleteApi) => void;
+  clear: () => void;
 }
 const ws: Socket<ServerToClientEvents, ClientToServerEvents> = io(IP);
 

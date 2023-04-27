@@ -11,8 +11,17 @@ class Circle extends Shape {
   ) {
     super(lineType.lineWidth, lineType.lineColor);
   }
-  draw(board: CanvasRenderingContext2D): void {
-    Circle.draw(board, this);
+  static from(
+    lineType: PrintingLineType,
+    data: ICircleData
+  ): Circle {
+    return new Circle(
+      lineType,
+      data.beginPositionX,
+      data.beginPositionY,
+      data.endPositionX,
+      data.endPositionY,
+    );
   }
   addPath(board: CanvasRenderingContext2D, nextPoint: Point): void {
     board.clearRect(0, 0, board.canvas.width, board.canvas.height);
@@ -32,21 +41,22 @@ class Circle extends Shape {
     this.endPositionY = endPositionY;
     return this;
   }
-  static from(
-    lineType: PrintingLineType,
-    data: ICircleData
-  ): Circle {
-    return new Circle(
-      lineType,
-      data.beginPositionX,
-      data.beginPositionY,
-      data.endPositionX,
-      data.endPositionY,
+  _draw(board: CanvasRenderingContext2D): void {
+    board.beginPath();
+    board.ellipse(
+      (this.endPositionX + this.beginPositionX) / 2,
+      (this.endPositionY + this.beginPositionY) / 2,
+      Math.abs(this.endPositionX - this.beginPositionX) / 2,
+      Math.abs(this.endPositionY - this.beginPositionY) / 2,
+      0,
+      0,
+      Math.PI * 2,
     );
+    board.closePath();
+    board.stroke();
   }
-  value(): IPrintingData<ICirclePrintingData> {
+  _value(): ICirclePrintingData {
     return {
-      ...super.lineValue(),
       type: PrintingType.CIRCLE,
       data: {
         beginPositionX: this.beginPositionX,
@@ -55,23 +65,6 @@ class Circle extends Shape {
         endPositionY: this.endPositionY,
       },
     };
-  }
-  static draw(board: CanvasRenderingContext2D, shape: Circle): void {
-    board.strokeStyle = shape.lineColor;
-    board.lineWidth = shape.lineWidth;
-    board.beginPath();
-    board.ellipse(
-      (shape.endPositionX + shape.beginPositionX) / 2,
-      (shape.endPositionY + shape.beginPositionY) / 2,
-      Math.abs(shape.endPositionX - shape.beginPositionX) / 2,
-      Math.abs(shape.endPositionY - shape.beginPositionY) / 2,
-      0,
-      0,
-      Math.PI * 2,
-    );
-    board.closePath();
-    board.stroke();
-
   }
 }
 export default Circle;

@@ -1,24 +1,74 @@
-import DrawingBoardManager from "@class/DrawingBoardManager";
 import PrintingBoard from "@class/PrintingBoard";
-import { ST } from "@type/const";
-import pipe from "@utils/pipe";
+import { ST, PenType, PrintingType } from "@type/const";
+import DrawingBoardManager from "@class/DrawingBoardManager";
+import { getClientPosition } from "@utils/dom";
+import { toolConfig } from "@utils/const";
+import ws from "@utils/serve";
 type IApi = IDeleteApi | IAddApi;
 type IOption = IAddOption | IDeleteOption;
+const penTypeToPrintingType = (penType: PenType): PrintingType => {
+  switch (penType) {
+    case PenType.PEN:
+      return PrintingType.PEN;
+    case PenType.CIRCLE:
+      return PrintingType.CIRCLE;
+    case PenType.RECTANGLE:
+      return PrintingType.RECTANGLE;
+    case PenType.TEXT:
+      return PrintingType.TEXT;
+    default:
+      throw 'err';
+  }
+};
 class BoardManager {
-  private drawingBoardManager;
-  private printingBoard;
+  private printingBoard: PrintingBoard;
   private version: Version;
   private waitOptMap = new Map<Version, IOption>();
-  constructor({ version, data }: IInitApi) {
-    this.drawingBoardManager = new DrawingBoardManager();
-    this.printingBoard = new PrintingBoard(document.getElementById('printing-board') as HTMLCanvasElement);
-    const boardDiv = document.getElementById('board') as HTMLDivElement;
-    boardDiv.addEventListener('mousedown', e => {
-      boardDiv.appendChild(this.drawingBoardManager.create(e));
+  private printingType = PenType.PEN;
+  constructor({ version, data }: IInitApi, dom: HTMLElement) {
+    const drawingBoardManager = new DrawingBoardManager();
+    dom.addEventListener('mousedown', e => {
+      if (this.printingType === PenType.ERASER) {
+        dom.onmousemove = ev => {
+          const { offsetX, offsetY } = getClientPosition(dom);
+          for (const id of this.printingBoard.selectShapeWithPosition([Math.round(ev.clientX - offsetX), Math.round(ev.clientY - offsetY)])) {
+            this.printingBoard.deleteShape(id);
+            ws.emit(ST.DELETE, {
+              version: this.version,
+              data: {
+                type: ST.DELETE,
+                data: {
+                  id,
+                }
+              }
+            });
+          }
+        };
+        dom.onmouseup = () => {
+          dom.onmouseleave = null;
+          dom.onmousemove = null;
+          dom.onmouseup = null;
+        }
+        dom.onmouseleave = () => {
+          dom.onmouseleave = null;
+          dom.onmousemove = null;
+          dom.onmouseup = null;
+        }
+      } else {
+        dom.appendChild(drawingBoardManager.create(dom, e, penTypeToPrintingType(this.printingType)));
+      }
     });
-    pipe.on('printing', id => {
-      this.drawingBoardManager.delate(id);
-    });
+    for (const tool of toolConfig) {
+      const el = document.createElement('button');
+      el.textContent = tool.title;
+      el.addEventListener('click', () => {
+        this.changePrinting(tool.type);
+      })
+      document.getElementById('root')?.appendChild(el);
+    }
+    const printingBoard = document.createElement('canvas');
+    dom.appendChild(printingBoard);
+    this.printingBoard = new PrintingBoard(printingBoard);
     this.version = version;
     const initData = data.data.printingList;
     for (const printing of initData) {
@@ -33,6 +83,9 @@ class BoardManager {
   }
   getVersion(): Version {
     return this.version;
+  }
+  private changePrinting(newPrintingType: PenType) {
+    this.printingType = newPrintingType;
   }
   private tryDoWaitOpt() {
     const nextVersion = this.version + 1;
