@@ -20,7 +20,7 @@ type FallbackToUntypedListener<T> = [T] extends [never]
     ? (...args: any[]) => void | Promise<void>
     : T;
 
-export type EventNames<Map extends EventsMap> = keyof Map & (string | symbol);
+type EventNames<Map extends EventsMap> = keyof Map & (string | symbol);
 
 class Pipe<ListenEvents extends EventsMap> {
   private eventMap = new Map<EventNames<ListenEvents>, ReservedOrUserListener<ListenEvents, EventNames<ListenEvents>>>();

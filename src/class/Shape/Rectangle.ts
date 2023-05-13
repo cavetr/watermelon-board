@@ -8,10 +8,12 @@ class Rectangle extends Shape {
     private beginPositionY: number,
     private endPositionX: number,
     private endPositionY: number,
+    moveX = 0,
+    moveY = 0,
   ) {
-    super(lineType.lineWidth, lineType.lineColor);
+    super(lineType.lineWidth, lineType.lineColor, moveX, moveY);
   }
-  
+
   addPath(board: CanvasRenderingContext2D, nextPoint: Point): void {
     board.clearRect(0, 0, board.canvas.width, board.canvas.height);
     this.endPositionX = nextPoint[0];
@@ -32,7 +34,9 @@ class Rectangle extends Shape {
   }
   static from(
     lineType: PrintingLineType,
-    data: IRectangleData
+    data: IRectangleData,
+    moveX: number,
+    moveY: number,
   ): Rectangle {
     return new Rectangle(
       lineType,
@@ -40,6 +44,8 @@ class Rectangle extends Shape {
       data.beginPositionY,
       data.endPositionX,
       data.endPositionY,
+      moveX,
+      moveY,
     );
   }
   _draw(board: CanvasRenderingContext2D): void {
@@ -53,16 +59,19 @@ class Rectangle extends Shape {
     board.closePath();
     board.stroke();
   }
-  _value(): IRectanglePrintingData {
-    return {
-      type: PrintingType.RECTANGLE,
-      data: {
-        beginPositionX: this.beginPositionX,
-        beginPositionY: this.beginPositionY,
-        endPositionX: this.endPositionX,
-        endPositionY: this.endPositionY,
-      },
-    };
+  _value(): IRectanglePrintingData | null {
+    if (this.beginPositionX !== this.endPositionX && this.beginPositionY !== this.endPositionY) {
+      return {
+        type: PrintingType.RECTANGLE,
+        data: {
+          beginPositionX: this.beginPositionX,
+          beginPositionY: this.beginPositionY,
+          endPositionX: this.endPositionX,
+          endPositionY: this.endPositionY,
+        },
+      };
+    }
+    return null;
   }
 }
 export default Rectangle;

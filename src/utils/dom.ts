@@ -1,4 +1,4 @@
-import { width, height } from "./const";
+
 function isColor(color: string): boolean {
   return color[0] === '#' && color.length === 7 && !isNaN(parseInt(color.slice(1), 16));
 }
@@ -11,8 +11,8 @@ export function getClientPosition(dom: HTMLElement) {
     offsetY,
   }
 }
-export function getContextFromCanvas(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
-  return adaptDPR(canvas.getContext('2d') as CanvasRenderingContext2D);
+export function getContextFromCanvas(canvas: HTMLCanvasElement, width:number, height: number): CanvasRenderingContext2D {
+  return adaptDPR(canvas.getContext('2d') as CanvasRenderingContext2D, width, height);
 }
 export function getLineType(): PrintingLineType {
   const widthValue = Number((document.querySelector('#width') as HTMLInputElement).value);
@@ -24,7 +24,7 @@ export function getLineType(): PrintingLineType {
     lineWidth,
   }
 }
-export function adaptDPR(ctx: CanvasRenderingContext2D) {
+function adaptDPR(ctx: CanvasRenderingContext2D, width:number, height: number) {
   const dpr = window.devicePixelRatio;
   ctx.canvas.width = Math.round(width * dpr);
   ctx.canvas.height = Math.round(height * dpr);

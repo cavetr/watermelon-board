@@ -8,18 +8,24 @@ class Text extends Shape {
     private text: string,
     private positionX: number,
     private positionY: number,
+    moveX = 0,
+    moveY = 0,
   ) {
-    super(lineType.lineWidth, lineType.lineColor);
+    super(lineType.lineWidth, lineType.lineColor, moveX, moveY);
   }
   static from(
     lineType: PrintingLineType,
-    data: ITextData
+    data: ITextData,
+    moveX: number,
+    moveY: number,
   ): Text {
     return new Text(
       lineType,
       data.text,
       data.positionX,
-      data.positionY
+      data.positionY,
+      moveX,
+      moveY,
     );
   }
   addPath(): void { }
@@ -30,15 +36,18 @@ class Text extends Shape {
   _draw(board: CanvasRenderingContext2D): void {
     board.fillText(this.text, this.positionX, this.positionY);
   }
-  _value(): ITextPrintingData {
-    return {
-      type: PrintingType.TEXT,
-      data: {
-        text: this.text,
-        positionX: this.positionX,
-        positionY: this.positionY,
-      }
-    };
+  _value(): ITextPrintingData | null {
+    if (this.text) {
+      return {
+        type: PrintingType.TEXT,
+        data: {
+          text: this.text,
+          positionX: this.positionX,
+          positionY: this.positionY,
+        }
+      };
+    }
+    return null;
   }
 }
 export default Text;

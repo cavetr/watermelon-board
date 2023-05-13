@@ -49,8 +49,8 @@ class LinkList<KeyType, NodeValType> {
     this.head === null;
     this.idNodeMap.clear();
   }
-  getNodeValFromId(id: KeyType): NodeValType | -1 {
-    return this.idNodeMap.get(id)?.val ?? -1;
+  getNodeValFromId(id: KeyType): NodeValType | null {
+    return this.idNodeMap.get(id)?.val ?? null;
   }
   findLastOneId(fn: (id: KeyType, node: NodeValType) => boolean): KeyType | -1 {
     let node = this.tail;

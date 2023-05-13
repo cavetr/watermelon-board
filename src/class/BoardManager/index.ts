@@ -3,9 +3,10 @@ import { ST, PenType, PrintingType } from "@type/const";
 import DrawingBoardManager from "@class/DrawingBoardManager";
 import { getClientPosition } from "@utils/dom";
 import { toolConfig } from "@utils/const";
-import ws from "@utils/serve";
-type IApi = IDeleteApi | IAddApi;
-type IOption = IAddOption | IDeleteOption;
+import { Socket } from "socket.io-client";
+
+type IApi = IDeleteApi | IAddApi | IMoveApi;
+type IOption = IAddOption | IDeleteOption | IMoveOption;
 const penTypeToPrintingType = (penType: PenType): PrintingType => {
   switch (penType) {
     case PenType.PEN:
@@ -25,56 +26,129 @@ class BoardManager {
   private version: Version;
   private waitOptMap = new Map<Version, IOption>();
   private printingType = PenType.PEN;
-  constructor({ version, data }: IInitApi, dom: HTMLElement) {
-    const drawingBoardManager = new DrawingBoardManager();
-    dom.addEventListener('mousedown', e => {
-      if (this.printingType === PenType.ERASER) {
-        dom.onmousemove = ev => {
-          const { offsetX, offsetY } = getClientPosition(dom);
-          for (const id of this.printingBoard.selectShapeWithPosition([Math.round(ev.clientX - offsetX), Math.round(ev.clientY - offsetY)])) {
-            this.printingBoard.deleteShape(id);
-            ws.emit(ST.DELETE, {
-              version: this.version,
-              data: {
-                type: ST.DELETE,
-                data: {
-                  id,
-                }
-              }
-            });
-          }
-        };
-        dom.onmouseup = () => {
-          dom.onmouseleave = null;
-          dom.onmousemove = null;
-          dom.onmouseup = null;
-        }
-        dom.onmouseleave = () => {
-          dom.onmouseleave = null;
-          dom.onmousemove = null;
-          dom.onmouseup = null;
-        }
-      } else {
-        dom.appendChild(drawingBoardManager.create(dom, e, penTypeToPrintingType(this.printingType)));
-      }
-    });
-    for (const tool of toolConfig) {
-      const el = document.createElement('button');
-      el.textContent = tool.title;
-      el.addEventListener('click', () => {
-        this.changePrinting(tool.type);
-      })
-      document.getElementById('root')?.appendChild(el);
-    }
+  private printingButton: HTMLButtonElement | null = null;
+  constructor({ version, data }: IInitApi, dom: HTMLElement, ws: Socket<ServerToClientEvents, ClientToServerEvents>, lock: boolean) {
+    const boardBox = document.createElement('div');
+    boardBox.className = 'board';
+    dom.appendChild(boardBox);
     const printingBoard = document.createElement('canvas');
-    dom.appendChild(printingBoard);
-    this.printingBoard = new PrintingBoard(printingBoard);
+    boardBox.appendChild(printingBoard);
+    this.printingBoard = new PrintingBoard(printingBoard, data.data.width, data.data.height);
     this.version = version;
     const initData = data.data.printingList;
     for (const printing of initData) {
       this.printingBoard.addShape(printing);
     }
     this.printingBoard.reDraw();
+    const drawingBoardManager = new DrawingBoardManager();
+    if (!lock) {
+      const buttonBox = document.createElement('div');
+      buttonBox.className = 'button-box';
+      for (const tool of toolConfig) {
+        const el = document.createElement('button');
+        el.innerHTML += tool.title;
+        el.className = 'shape-type-button';
+        if (tool.type === PenType.PEN) {
+          el.className += ' active';
+          this.printingButton = el;
+        }
+        el.addEventListener('click', e => {
+          if (this.printingButton) {
+            this.printingButton.className = 'shape-type-button';
+          }
+          this.changePrinting(tool.type);
+          this.printingButton = el;
+          el.className = 'shape-type-button active';
+        });
+        buttonBox.appendChild(el);
+      }
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      const lineWidthInput = document.createElement('input');
+      colorInput.className = 'shape-style-input';
+      lineWidthInput.className = 'shape-style-input';
+      lineWidthInput.type = 'number';
+      lineWidthInput.value = '1';
+      lineWidthInput.addEventListener('change', (e) => {
+        const target = (e.target as typeof lineWidthInput);
+        target.value = String(Math.max(Number(target.value), 1));
+        target.value = String(Math.min(Number(target.value), 5));
+      });
+      buttonBox.appendChild(colorInput);
+      buttonBox.appendChild(lineWidthInput);
+      dom.appendChild(buttonBox);
+      boardBox.addEventListener('mousedown', e => {
+        if (this.printingType === PenType.ERASER) {
+          boardBox.onmousemove = ev => {
+            const { offsetX, offsetY } = getClientPosition(boardBox);
+            for (const id of this.printingBoard.selectShapeWithPosition([Math.round(ev.clientX - offsetX), Math.round(ev.clientY - offsetY)])) {
+              this.printingBoard.deleteShape(id);
+              ws.emit(ST.DELETE, {
+                version: this.version,
+                data: {
+                  type: ST.DELETE,
+                  data: {
+                    id,
+                  }
+                }
+              });
+            }
+            this.printingBoard.reDraw();
+          };
+          const drawOver = () => {
+            boardBox.onmouseleave = null;
+            boardBox.onmousemove = null;
+            boardBox.onmouseup = null;
+          };
+          boardBox.onmouseup = drawOver;
+          boardBox.onmouseleave = drawOver;
+        } else if (this.printingType === PenType.DRAG) {
+          const { offsetX, offsetY } = getClientPosition(boardBox);
+          const [id] = this.printingBoard.selectShapeWithPosition([Math.round(e.clientX - offsetX), Math.round(e.clientY - offsetY)]);
+          const shape = this.printingBoard.getShape(id);
+          if (shape) {
+            let lastPoint = [e.clientX, e.clientY];
+            boardBox.onmousemove = ev => {
+              shape.addMove(ev.clientX - lastPoint[0], ev.clientY - lastPoint[1]);
+              lastPoint = [ev.clientX, ev.clientY];
+              this.printingBoard.reDraw(true);
+            }
+            const drawOver = () => {
+              const value = shape.value();
+              if (value) {
+                const { moveX, moveY } = value;
+                ws.emit(ST.MOVE, {
+                  version: this.version,
+                  data: {
+                    type: ST.MOVE,
+                    data: {
+                      id,
+                      moveX,
+                      moveY,
+                    }
+                  }
+                });
+              }
+              boardBox.onmouseleave = null;
+              boardBox.onmousemove = null;
+              boardBox.onmouseup = null;
+            };
+            boardBox.onmouseup = drawOver;
+            boardBox.onmouseleave = drawOver;
+          }
+        } else {
+          boardBox.appendChild(
+            drawingBoardManager.create(
+              boardBox,
+              e,
+              penTypeToPrintingType(this.printingType),
+              Number(lineWidthInput.value),
+              colorInput.value,
+              data.data.width,
+              data.data.height));
+        }
+      });
+    }
   }
   addOption({ version, data: opt }: IApi) {
     console.log(opt);
@@ -98,6 +172,9 @@ class BoardManager {
             break;
           case ST.DELETE:
             this.printingBoard.deleteShape(opt.data.id);
+            break;
+          case ST.MOVE:
+            this.printingBoard.moveShape(opt.data.id, opt.data.moveX, opt.data.moveY);
             break;
           default:
             throw '什么东西？？';

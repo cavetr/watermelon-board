@@ -3,7 +3,6 @@ import Shape from '@class/Shape';
 import ShapeFactory from '@class/Shape/ShapeFactory';
 import { getContextFromCanvas } from '@utils/dom';
 import pipe from '@utils/pipe';
-import ws from '@utils/serve';
 const reDrawTime = 1000;
 const selectRange = 8;
 function getColorFromFirstIndex(data: Uint8ClampedArray, index: number) {
@@ -18,7 +17,7 @@ function getColorFromFirstIndex(data: Uint8ClampedArray, index: number) {
   }
   return color;
 }
-class PrintingBoard {
+class PrintingBoard{
   private randColor = 0;
   private selectionCtx: CanvasRenderingContext2D;
   private selectionShapeIdMap = new Map<string, Id>();
@@ -29,20 +28,15 @@ class PrintingBoard {
   private isChange: boolean = true;
   readonly width: number;
   readonly height: number;
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, width: number, height: number) {
     const _canvas = document.createElement('canvas');
     _canvas.style.width = canvas.style.width;
     _canvas.style.height = canvas.style.height;
-    this.selectionCtx = getContextFromCanvas(_canvas);
+    this.selectionCtx = getContextFromCanvas(_canvas, width, height);
     this.selectionCtx.imageSmoothingEnabled = false;
-    this.printingCtx = getContextFromCanvas(canvas);
+    this.printingCtx = getContextFromCanvas(canvas, width, height);
     this.width = canvas.width;
     this.height = canvas.height;
-    document.getElementById('clear')?.addEventListener('click', () => {
-      ws.emit('clear');
-      this.shapeList.clear();
-      this.reDraw();
-    });
   }
   addShape(printing: IPrinting) {
     this.isChange = true;
@@ -52,14 +46,21 @@ class PrintingBoard {
   deleteShape(id: Id) {
     this.isChange = true;
     this.shapeList.deleteNode(id);
-    this.reDraw();
   }
-  reDraw() {
+  moveShape(id: Id, moveX: number, moveY: number) {
+    this.isChange = true;
+    const shape = this.shapeList.getNodeValFromId(id);
+    shape?.setMove(moveX, moveY);
+  }
+  getShape(id: Id) {
+    return this.shapeList.getNodeValFromId(id);
+  }
+  reDraw(must = false) {
     if (this.reDrawTimeOutId !== void 0) {
       clearTimeout(this.reDrawTimeOutId);
       this.reDrawTimeOutId = void 0;
     }
-    if (this.isChange) {
+    if (must || this.isChange) {
       this.selectionShapeIdMap.clear();
       this.selectionCtx.clearRect(0, 0, this.width, this.height);
       this.printingCtx.clearRect(0, 0, this.width, this.height);
@@ -74,7 +75,7 @@ class PrintingBoard {
         }
         const randColor = this.getRandColor();
         // console.log(randColor);
-        console.log(randColor);
+        // console.log(randColor);
         this.selectionShapeIdMap.set(randColor, id);
         printing.draw(this.selectionCtx, {
           strokeStyle: randColor,
@@ -88,7 +89,7 @@ class PrintingBoard {
       this.reDraw();
     }, reDrawTime);
   }
-  selectShapeWithPosition(point: Point): Id[] {
+  selectShapeWithPosition(point: Point, onlyFirst = false): Id[] {
     const dpr = window.devicePixelRatio;
     const range = (selectRange / 2);
     const selectShapeIdList: Set<Id> = new Set();
@@ -111,7 +112,11 @@ class PrintingBoard {
         ];
         for (const color of colorList) {
           if (this.selectionShapeIdMap.has(color)) {
-            selectShapeIdList.add(this.selectionShapeIdMap.get(color) as string);
+            const id = this.selectionShapeIdMap.get(color) as string;
+            if(onlyFirst) {
+              return [id];
+            }
+            selectShapeIdList.add(id);
           }
         }
       }

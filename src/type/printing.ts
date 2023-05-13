@@ -50,7 +50,12 @@ type PrintingLineType = {
   lineColor: string;
 }
 
-type IPrintingData<T extends PrintingDateType = PrintingDateType> = PrintingLineType & T;
+type IPrintingData<T extends PrintingDateType = PrintingDateType> =
+  PrintingLineType &
+  T & {
+    moveX: number;
+    moveY: number;
+  };
 interface IPrinting {
   boardId: Id; // 画板id，客户端生成，用于重绘时删除
   shapeId: Id;

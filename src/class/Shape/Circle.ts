@@ -8,12 +8,16 @@ class Circle extends Shape {
     private beginPositionY: number,
     private endPositionX: number,
     private endPositionY: number,
+    moveX = 0,
+    moveY = 0,
   ) {
-    super(lineType.lineWidth, lineType.lineColor);
+    super(lineType.lineWidth, lineType.lineColor, moveX, moveY);
   }
   static from(
     lineType: PrintingLineType,
-    data: ICircleData
+    data: ICircleData,
+    moveX: number,
+    moveY: number,
   ): Circle {
     return new Circle(
       lineType,
@@ -21,6 +25,8 @@ class Circle extends Shape {
       data.beginPositionY,
       data.endPositionX,
       data.endPositionY,
+      moveX,
+      moveY,
     );
   }
   addPath(board: CanvasRenderingContext2D, nextPoint: Point): void {
@@ -55,16 +61,19 @@ class Circle extends Shape {
     board.closePath();
     board.stroke();
   }
-  _value(): ICirclePrintingData {
-    return {
-      type: PrintingType.CIRCLE,
-      data: {
-        beginPositionX: this.beginPositionX,
-        beginPositionY: this.beginPositionY,
-        endPositionX: this.endPositionX,
-        endPositionY: this.endPositionY,
-      },
-    };
+  _value(): ICirclePrintingData | null {
+    if (this.beginPositionX !== this.endPositionX && this.beginPositionY !== this.endPositionY) {
+      return {
+        type: PrintingType.CIRCLE,
+        data: {
+          beginPositionX: this.beginPositionX,
+          beginPositionY: this.beginPositionY,
+          endPositionX: this.endPositionX,
+          endPositionY: this.endPositionY,
+        },
+      };
+    }
+    return null;
   }
 }
 export default Circle;

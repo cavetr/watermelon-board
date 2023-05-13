@@ -1,6 +1,6 @@
 import { PenType, PrintingType } from "@type/const";
 import ShapeFactory from "@class/Shape/ShapeFactory";
-import { getClientPosition, getLineType } from "@utils/dom";
+import { getClientPosition } from "@utils/dom";
 
 import pipe from "@utils/pipe";
 class DrawingBoardManager {
@@ -17,14 +17,15 @@ class DrawingBoardManager {
       this.boardMap.delete(id);
     }
   }
-  create(dom: HTMLElement, e: MouseEvent, type: PrintingType): HTMLCanvasElement {
+
+  create(dom: HTMLElement, e: MouseEvent, type: PrintingType, lineWidth: number, lineColor: string, width:number, height: number): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     const id = crypto.randomUUID();
     canvas.className = 'drawing-board';
     canvas.id = id;
     const { offsetX, offsetY } = getClientPosition(dom);
-    const shape = ShapeFactory.getShapeFromPoint(type, getLineType(), [Math.round(e.clientX - offsetX), Math.round(e.clientY - offsetY)]);
-    ShapeFactory.getInitCanvasFn(type)(canvas, dom, shape);
+    const shape = ShapeFactory.getShapeFromPoint(type, {lineWidth, lineColor}, [Math.round(e.clientX - offsetX), Math.round(e.clientY - offsetY)]);
+    ShapeFactory.getInitCanvasFn(type)(canvas, dom, shape, width, height);
     this.boardMap.set(id, canvas);
     return canvas;
   }
