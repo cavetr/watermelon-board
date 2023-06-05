@@ -20,7 +20,9 @@ class DrawingBoardManager {
 
   create(dom: HTMLElement, e: MouseEvent, type: PrintingType, lineWidth: number, lineColor: string, width:number, height: number): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
-    const id = crypto.randomUUID();
+    // const id = crypto.randomUUID();
+    // 不能在非https中使用crypto
+    const id = Math.random().toString(36).slice(-8);
     canvas.className = 'drawing-board';
     canvas.id = id;
     const { offsetX, offsetY } = getClientPosition(dom);
